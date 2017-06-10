@@ -25,11 +25,14 @@ namespace Vidly.Controllers
 
         public ViewResult Index()
         {
-            var movies = _context.Movies.Include(m => m.Genre).ToList();
+            //var movies = _context.Movies.Include(m => m.Genre).ToList();
 
-            return View(movies);
+            if(User.IsInRole("CanManageMovies"))
+                return View("List");
+            return View("ReadOnlyList");
         }
 
+        [Authorize(Roles =RoleName.CanManageMovies)]
         public ViewResult New()
         {
             var genres = _context.Genres.ToList();
@@ -43,7 +46,7 @@ namespace Vidly.Controllers
 
             return View("New", viewModel);
         }
-
+        [Authorize(Roles = RoleName.CanManageMovies)]
         public ActionResult Edit(int id)
         {
             var movie = _context.Movies.SingleOrDefault(c => c.Id == id);
@@ -60,7 +63,7 @@ namespace Vidly.Controllers
             return View("New", viewModel);
         }
 
-
+        [Authorize(Roles = RoleName.CanManageMovies)]
         public ActionResult Details(int id)
         {
             var movie = _context.Movies.Include(m => m.Genre).SingleOrDefault(m => m.Id == id);
@@ -74,6 +77,7 @@ namespace Vidly.Controllers
 
 
         // GET: Movies/Random
+       
         public ActionResult Random()
         {
             var movie = new Movie() { Name = "Shrek!" };
@@ -94,6 +98,7 @@ namespace Vidly.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleName.CanManageMovies)]
         public ActionResult Save(Movie movie)
         {
             if (!ModelState.IsValid)
